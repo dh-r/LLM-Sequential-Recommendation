@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "LLM-sequential-recommendations"
-version = "9.0.101"
+name = "LLM-Sequential-Recommendation"
+version = "1.0.0"
 description = ""
-authors = ["Anon"]
+authors = ["DH Research"]
 
 [tool.poetry.dependencies]
 python = "~3.9"
@@ -11,22 +11,12 @@ ipykernel = "^6.13.0"
 jupyter-contrib-nbextensions = "^0.5.1"
 scipy = "^1.8.1"
 import-ipynb = "^0.1.4"
-seaborn = "^0.11.2"
 pandarallel = "^1.6.1"
 tqdm = "^4.64.0"
-modin = { extras = ["dask"], version = "^0.15.0" }
 multiprocess = "^0.70.13"
 jupyterlab-code-formatter = "^1.4.11"
 papermill = "^2.3.4"
 scikit-optimize = "^0.9.0"
-pyarrow = "^9.0.0"
-skglm = "^0.2"
-Levenshtein = "^0.20.8"
-greek-stemmer-pos = "^1.1.2"
-nltk = "^3.7"
-PyStemmer = "2.0.1"
-gcsfs = "^2022.11.0"
-scikit-learn = "^1.1.3"
 numpy = "^1.23"
 tensorflow-macos = { version = "^2.11.0", platform = "darwin" } 
 tensorflow = { version = "^2.10", platform = "linux" }
@@ -35,16 +25,10 @@ openai = "0.27"
 [tool.poetry.group.dev.dependencies]
 black = { extras = ["jupyter"], version = "^23.1.0" }
 flake8 = "^4.0.1"
-line-profiler = "^3.5.1"
-memory-profiler = "^0.60.0"
-pytest = "^7.1.2"
-"keyrings.google-artifactregistry-auth" = "^1.1.1"
 isort = "^5.10.1"
 jupyterlab-code-formatter = "^1.5.3"
-google-cloud-storage = "^2.7.0"
 ipython-autotime = "^0.3.1"
 ipywidgets = "^8.0.4"
-memray = "^1.7.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

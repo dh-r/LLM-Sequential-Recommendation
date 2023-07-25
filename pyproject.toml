@@ -3,6 +3,7 @@ name = "LLM-Sequential-Recommendation"
 version = "1.0.0"
 description = ""
 authors = ["DH Research"]
+packages = [{ include = "main" }]
 
 [tool.poetry.dependencies]
 python = "~3.9"
@@ -21,6 +22,7 @@ numpy = "^1.23"
 tensorflow-macos = { version = "^2.11.0", platform = "darwin" } 
 tensorflow = { version = "^2.10", platform = "linux" }
 openai = "0.27"
+matplotlib = "^3.7.2"
 
 [tool.poetry.group.dev.dependencies]
 black = { extras = ["jupyter"], version = "^23.1.0" }

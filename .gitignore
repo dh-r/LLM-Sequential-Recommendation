@@ -1,0 +1,10 @@
+*.pyc
+*.nbc
+*.nbi
+*.DS_Store
+beauty/meta_Beauty.json
+beauty/reviews_Beauty.json
+*.idea
+*.ipynb_checkpoints
+main/openai/openai_utils/openai_embeddings_cache.pkl
+main/openai/openai_utils/real_key.txt

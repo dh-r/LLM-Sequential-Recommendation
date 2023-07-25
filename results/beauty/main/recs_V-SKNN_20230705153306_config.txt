@@ -1,0 +1,1 @@
+{'is_verbose': True, 'cores': 1, 'k': 70, 'sample_size': 1090, 'sampling': 'random', 'sample_random_state': None, 'sequential_weighting': False, 'sequential_filter': False, 'decay': 'harmonic', 'similarity_measure': 'dot', 'filter_prompt_items': True, 'last_n_items': None, 'idf_weighting': True, 'session_time_discount': None}

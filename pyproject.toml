@@ -23,6 +23,7 @@ tensorflow-macos = { version = "^2.11.0", platform = "darwin" }
 tensorflow = { version = "^2.10", platform = "linux" }
 openai = "0.27"
 matplotlib = "^3.7.2"
+numba = "^0.57.1"
 
 [tool.poetry.group.dev.dependencies]
 black = { extras = ["jupyter"], version = "^23.1.0" }

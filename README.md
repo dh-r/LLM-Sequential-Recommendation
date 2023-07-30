@@ -1,5 +1,22 @@
 # LLM-sequential-recommendations
-Anonymized code necessary for reproducing "Leveraging Large Language Models for Sequential Recommendation"
+Implementation and reproducible experiments behind the research paper "Leveraging Large Language Models for Sequential Recommendation" published in RecSys'23 Late-Breaking Results track. Please cite as follows.
+
+```
+@inproceedings{Harte2023leveraging,
+author = {Harte, Jesse and Zorgdrager, Wouter and Louridas, Panos and Katsifodimos, Asterios and Jannach, Dietmar and Fragkoulis, Marios},
+title = {Leveraging Large Language Models for Sequential Recommendation}, 
+year = {2023},
+isbn = {979-8-4007-0241-9/23/09},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3604915.3610639},
+doi = {10.1145/3604915.3610639},
+booktitle = {Proceedings of the 17th ACM Conference on Recommender Systems},
+numpages = {7},
+location = {Singapore, Singapore},
+series = {RecSys '23}
+}
+```
 
 
 ## Installation
@@ -37,7 +54,7 @@ poetry install
 We organized the repository by distinguishing between dataset-related code (e.g. `beauty`), implementation code (inside `main`), notebooks for analysis and visualization (inside `notebooks`), and results (in `results`). We explain our dataset-related code in a separate `README.md` in the corresponding directory. 
 
 ## Data-related code 
-For now we have included all code we used to process Beauty in the `beauty` directory with a separate `README.md`. Regarding the Anonymous dataset, we are discussing with our organization to make it available.
+For now we have included all code we used to process Beauty in the `beauty` directory with a separate `README.md`. Regarding the Delivery Hero dataset, we are discussing with our organization to make it available.
 
 ## Main directory
 The implementation code in `main` first of all contains `data` and `eval`. The former contains the implementation of our `SessionDataset`, which is a convenient object to group together all the code and data related to a single dataset, including the train and test set, but also the train and test set of the validation folds. The latter contains the implementation of each of the metrics and `evaluation.py`, which converts the recommendations and ground-truths into the format expected by the metrics, evaluates the recommendation using the metrics, and subsequently provides a view of the evaluation on all metrics. 

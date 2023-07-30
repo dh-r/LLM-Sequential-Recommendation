@@ -3,7 +3,7 @@
 ## Neural models 
 Our implementations of BERT4Rec, SASRec and GRU4Rec are subclasses of our `NeuralModel` in `main/neural_model.py`, which contains all functionality for training and predicting with a Keras model. Here, we take 10% of the train sessions (with a maximum of 500 sessions) and place them in an "inner-validation" set, and use the inner-validation set for early stopping. More specifically, after each epoch, we evaluate the model on NDCG@20 on the inner-validation set. If the model has not improved the inner-validation NDCG@20 for 2 epochs, we stop training and restore the model weights to the epoch with the best inner-validation NDCG@20. Using the inner-validation NDCG@20 prevents our models from overfitting on the data. Note that 2 epochs may seem like a short early-stopping patience, but our models generally converge within 5-15 epochs, even with lower learning rates. Therefore, even with higher values for the early-stopping patience, the model weights will often be restored to the same epoch, so higher values for the early-stopping patience would result in more superfluous training. 
 
-Note that all our neural models have the hyperparameter __N__, which is used to truncate long sessions to the last __N__ items. This is to ensure that sessions fit in the same tensor. We choose N = 20 for both the Beauty and the Anonymous dataset. 
+Note that all our neural models have the hyperparameter __N__, which is used to truncate long sessions to the last __N__ items. This is to ensure that sessions fit in the same tensor. We choose N = 20 for both the Beauty and the Delivery Hero dataset. 
 
 Lastly, we train all models with the Keras AdamW optimizer. 
 
@@ -23,7 +23,7 @@ We implemented SKNN according to the specifications in [5]. Our implementation p
 # Data 
 We preprocessed Beauty using the 5-core methodology, meaning we iteratively remove sessions and items until all sessions and items have at least five interactions. Note that in our test prompts there is a small amount of sessions that have less than five interactions. This is a result of our `filter_non_trained_test_items` flag in `beauty/split_sessions`, which removes all items from the prompts that were not included in the training data. In some rare cases, all five (or more) interactions of an item only appear in the test set, causing them to be filtered from the test prompts. 
 
-We do not apply any pre-processing to our anonymous QCommerce sessions dataset to better simulate a real-world setting, except that we removed sessions with only one interaction from the test set. 
+We do not apply any pre-processing to our Delivery Hero QCommerce sessions dataset to better simulate a real-world setting, except that we removed sessions with only one interaction from the test set. 
 
 For both datasets, we employ a temporal splitting strategy to separate the data into a train and test set. So, all test sessions succeed train sessions in time. We believe that the temporal splitting strategy best simulates a real-world setting in comparison to other splitting strategies in the literature (evolving [1] or simple random sampling). 
 
@@ -68,7 +68,7 @@ The searched hyperparameter ranges are listed below. An "*" (asterisk) denotes t
 | **LLMSeqSim**                       | {"constant", "linear", "quadratic", "cubic", "last_only"} |
 
 
-## Optimal hyperparameters Beauty
+## Optimal hyperparameters Beauty dataset
 
 | **Model / optimal hyperparameter** | **learning_rate** | **weight_decay** | **clipnorm** | **fit_batch_size** | **emb_dim** | **drop_rate** | **L** | **h** | **mask_prob** | **hidden_dim** |
 |--------------------------------|-------------------|------------------|--------------|--------------------|-------------|---------------|-------|-------|---------------|----------------|
@@ -90,7 +90,7 @@ The searched hyperparameter ranges are listed below. An "*" (asterisk) denotes t
 |--------------------------------| -- |
 | **LLMSeqSim**                       | last_only |
 
-## Optimal hyperparameters Anonymous
+## Optimal hyperparameters Delivery Hero dataset
 
 | **Model / optimal hyperparameter** | **learning_rate** | **weight_decay** | **clipnorm** | **fit_batch_size** | **emb_dim** | **drop_rate** | **L** | **h** | **mask_prob** | **hidden_dim** |
 |--------------------------------|-------------------|------------------|--------------|--------------------|-------------|---------------|-------|-------|---------------|----------------|
@@ -117,7 +117,7 @@ To reiterate our discussion on the results in our paper:
 
 - The gains obtained by initializing BERT4Rec with semantically-rich embeddings are substantial. We confirmed that the driver of performance are the semantics, instead of any statistical properties of the LLM embeddings. We did this by permuting the embeddings across the item catalogue, and found that the performance degraded heavily to the point where LLM2BERT4Rec had worse performance than vanilla BERT4Rec. 
 
-- The `LLMSeqSim` model performance varies across datasets. On Beauty it is highly competitive, whereas on our Anonymous dataset the model has poor performance. The substantially-higher number of infrequent items makes it harder for the `LLMSeqSim` to find the correct recommendation. Furthermore, we find that in the Beauty dataset, items in the same session are often semantically related, most often through the brand names. In our Anonymous dataset, this is not the case. In addition, we find that `LLMSeqSim` has a high Catalog Coverage, since it does not take item popularity into account. 
+- The `LLMSeqSim` model performance varies across datasets. On Beauty it is highly competitive, whereas on our Delivery Hero dataset the model has poor performance. The substantially-higher number of infrequent items makes it harder for the `LLMSeqSim` to find the correct recommendation. Furthermore, we find that in the Beauty dataset, items in the same session are often semantically related, most often through the brand names. In our Delivery Hero dataset, this is not the case. In addition, we find that `LLMSeqSim` has a high Catalog Coverage, since it does not take item popularity into account. 
 
 - The `SKNN` models are, though non-neural, very competitive in performance, especially on short sessions. See `notebooks/session_length_hitrate_*.ipynb` for SKNN's performance against session length. 
 
@@ -128,9 +128,9 @@ We excluded our observations on the optimal hyperparameter values due to space l
 
 Furthermore, it seems that in both cases `V-SKNN` is the most performant of the SKNN variants, indicating that it is necessary to assign a lower-weight to items in the long-tail of the session, which implies that these long-tail items are more likely to be less-related to the ground-truth item.
 
-For the `LLMSeqSim` model, it seems that in Beauty the last item is generally most related to the last item, and hence LAST_ONLY is the optimal weighing function for Beauty. In contrast, for the Anonymous dataset, it seems that the CONSTANT weighing function is optimal. Note that this simply correponds to taking the average of the embeddings of all items in the session. This may be explained by the fact that the Anonymous dataset contains shorter sessions, and so most items in the session are relevant to the ground-truth item. 
+For the `LLMSeqSim` model, it seems that in Beauty the last item is generally most related to the last item, and hence LAST_ONLY is the optimal weighing function for Beauty. In contrast, for the Delivery Hero dataset, it seems that the CONSTANT weighing function is optimal. Note that this simply correponds to taking the average of the embeddings of all items in the session. This may be explained by the fact that the Delivery Hero dataset contains shorter sessions, and so most items in the session are relevant to the ground-truth item. 
 
-For the `LLMSeqPrompt`, we surprisingly found that lowering the `temperature` to 0.25 for Beauty or 0.5 for the Anonymous dataset produced the best results. Generally, we find that lowering the `temperature` or `top_p` decreases the amount of hallucinated items, and increases the amount of duplicates. The  `temperature` and `top_p` parameters therefore directly control this trade-off. With the optimal hyperparameter configuration on `Beauty`, only 20% of the recommendations were unique, 80% of recommendations were duplicate recommendations, and 26% of the recommendations were hallucinated (not directly corresponding to an item in the catalogue). Hence, it seems to be the case that this model favours precision over diversity, since all duplicated recommendations are replaced with closely-related products. Hence, we get recommendation slates very similar to `LLMSeqSim` (very much focused on a single type of item or brand), with the added benefit that `LLMSeqPrompt` is not restricted to produce recommendations that are semantically similar to the test prompt, and can instead focus on recommending complementary products learned from the session data. 
+For the `LLMSeqPrompt`, we surprisingly found that lowering the `temperature` to 0.25 for Beauty or 0.5 for the Delivery Hero dataset produced the best results. Generally, we find that lowering the `temperature` or `top_p` decreases the amount of hallucinated items, and increases the amount of duplicates. The  `temperature` and `top_p` parameters therefore directly control this trade-off. With the optimal hyperparameter configuration on `Beauty`, only 20% of the recommendations were unique, 80% of recommendations were duplicate recommendations, and 26% of the recommendations were hallucinated (not directly corresponding to an item in the catalogue). Hence, it seems to be the case that this model favours precision over diversity, since all duplicated recommendations are replaced with closely-related products. Hence, we get recommendation slates very similar to `LLMSeqSim` (very much focused on a single type of item or brand), with the added benefit that `LLMSeqPrompt` is not restricted to produce recommendations that are semantically similar to the test prompt, and can instead focus on recommending complementary products learned from the session data. 
 
 ## Other string embedders
 We experimented with other string embedders than the `text-embedding-ada-002` embedder from OpenAI. The fact that retrieving the LLM Embeddings from OpenAI is pay-per-use limits its usability, and so we experimented with open-source embedders. We found [GenSim, topic modelling for humans](https://radimrehurek.com/gensim/models/word2vec.html) to have a Python API for retrieving word embeddings. Since these embedders map individual words to embeddings, not whole strings, we take the average of the embeddings of each individual word in the product names, if it exists in the vocabulary. We subsequently used these embeddings in our `LLMSeqSim` model. Surprisingly, the model with these open-source embeddings resulted in very poor performance and barely beat the `MostPopular` baseline. For example, the best model (of the open-source embedders) was `LLMSeqSim` with the `glove-wiki-gigaword-300` vocabulary with a NDCG@20 of 0.012 and HitRate@20 of 0.03. We attribute the difference in performance between the OpenAI LLM Embeddings and the embeddings by the open-source embedders to the fact that `text-embedding-ada-002` is able to embed the string as a whole, and recognizes brand names much more often. The former means that OpenAI *probably* has a more sophisticated mechanism in place to combine the embeddings of the tokens in the product name instead of the simple averaging we attempted for the open-source embeddings. The latter, recognizing brand names, seems to be a vital factor in performance when looking at the recommendations on an individual session level. The sessions for which the `LLMSeqSim` with `text-embedding-ada-002` embeddings correctly predicted the last item often had a strong semantic connection between the last item in the prompt and the ground-truth item. Most-often this semantic connection was through the brand name, and thus the performance of  `LLMSeqSim` with `text-embedding-ada-002` embeddings is significantly better than the performance of  `LLMSeqSim` with open-source embeddings. 
@@ -147,7 +147,7 @@ Beauty dataset
 | **GRU4Rec**     | 0.026       | 0.050          | 0.034       | 0.081          |
 | **LLM2GRU4Rec** | 0.028       | 0.056          | 0.037       | 0.089          |
 
-Anonymous dataset
+Delivery Hero dataset
 
 |                 | **NDCG@10** | **HitRate@10** | **NDCG@20** | **HitRate@20** |
 |-----------------|-------------|----------------|-------------|----------------|
@@ -156,7 +156,7 @@ Anonymous dataset
 | **GRU4Rec**     | 0.085       | 0.153          | 0.101       | 0.218          |
 | **LLM2GRU4Rec** | 0.084       | 0.152          | 0.101       | 0.218          |
 
-Evidently, we found that SASRec generally also benefits from being initialized with the LLM embeddings. In fact, we observe the same patterns for LLM2SASRec as we did for LLM2BERT4Rec; The LLM2SASRec model needs less regularization (drop_rate = 0.15, weight_decay = 0.007 on the Anonymous dataset), and is most optimal in deeper architectures (L = h = 4 in the Anonymous dataset). In contrast, for the LLM2GRU4Rec model the gains depend on the dataset; it shows to benefit from the LLM embeddings on Beauty, but not on the Anonymous dataset. This may be explained by the fact that Beauty has much fewer interactions per item on average when compared to the Anonymous dataset, so that the Anonymous dataset contains enough information per item to avoid overfitting by GRU4Rec, which the LLM embeddings seem to prevent for our transformer models. 
+Evidently, we found that SASRec generally also benefits from being initialized with the LLM embeddings. In fact, we observe the same patterns for LLM2SASRec as we did for LLM2BERT4Rec; The LLM2SASRec model needs less regularization (drop_rate = 0.15, weight_decay = 0.007 on the Delivery Hero dataset), and is most optimal in deeper architectures (L = h = 4 in the Delivery Hero dataset). In contrast, for the LLM2GRU4Rec model the gains depend on the dataset; it shows to benefit from the LLM embeddings on Beauty, but not on the Delivery Hero dataset. This may be explained by the fact that Beauty has much fewer interactions per item on average when compared to the Delivery Hero dataset, so that the Delivery Hero dataset contains enough information per item to avoid overfitting by GRU4Rec, which the LLM embeddings seem to prevent for our transformer models. 
 
 # References 
 

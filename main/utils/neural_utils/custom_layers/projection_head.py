@@ -4,10 +4,7 @@ from main.utils.neural_utils.custom_layers.bias_layer import (
 from main.utils.neural_utils.custom_activations import to_activation
 
 import tensorflow as tf
-from tensorflow import keras
 from keras import layers
-
-from keras.activations import softmax
 
 
 class ProjectionHead(layers.Layer):
@@ -24,7 +21,7 @@ class ProjectionHead(layers.Layer):
         self.dense: layers.Dense = layers.Dense(
             emb_dim,
             activation=to_activation(activation),
-            )
+        )
 
         self.item_embedder: layers.Embedding = item_embedder
 

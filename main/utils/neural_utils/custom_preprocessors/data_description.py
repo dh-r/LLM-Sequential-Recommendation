@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from typing import Dict, TypedDict
+from typing import TypedDict
 
 
 class DataDescription(TypedDict):

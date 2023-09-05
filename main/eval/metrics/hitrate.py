@@ -1,6 +1,5 @@
 from main.eval.metrics.metric import RankingMetric
 import numpy as np
-from typing import Union, Any
 
 
 class HitRate(RankingMetric):

@@ -36,8 +36,10 @@ class BERT(Transformer):
         """
         # Variables necessary for training BERTModel
         self.mask_prob: float = mask_prob
+
+        # We fix trans_dim_scale to accord with the original paper.
         transformer_kwargs["trans_dim_scale"] = 4
-        
+
         super().__init__(**transformer_kwargs)
 
     def get_keras_model(self, data: pd.DataFrame) -> keras.Model:

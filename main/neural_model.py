@@ -17,6 +17,7 @@ from main.utils.neural_utils.custom_callbacks.metric_callback import (
 )
 from main.eval.metrics.ndcg import NormalizedDiscountedCumulativeGain
 
+
 class NeuralModel(Model):
     def __init__(
         self,
@@ -25,8 +26,8 @@ class NeuralModel(Model):
         pred_batch_size: int = 1024,
         train_val_fraction: float = 0.1,
         early_stopping_patience: int = 2,
-        activation : str = "gelu",
-        filepath_weights = None,
+        activation: str = "gelu",
+        filepath_weights=None,
         **model_kwargs,
     ) -> None:
         """NeuralModel is the base class intended for neural models.
@@ -48,8 +49,8 @@ class NeuralModel(Model):
                 Defaults to 2.
             activation (str): The string representation of the activation function used
                 in the network. Defaults to GELU.
-            weights: The filepath to the weights of the model. If not None, we skip 
-                training and return a keras model with these weights.
+            filepath_weights: The filepath to the weights of the model. If not None, we
+                skip training and return a keras model with these weights.
         """
         super().__init__(**model_kwargs)
 
@@ -108,7 +109,7 @@ class NeuralModel(Model):
         # Get the Keras model from implementation.
         self.model = self.get_keras_model(self.input_data)
 
-        if self.filepath_weights is not None: 
+        if self.filepath_weights is not None:
             self.model.built = True
             self.model.load_weights(self.filepath_weights)
             self.is_trained = True
@@ -126,14 +127,32 @@ class NeuralModel(Model):
         def fit_model(*args, **kwargs):
             return self.model.fit(*args, **kwargs)
 
-        # Right now, this is hardcoded for session models with an id reducer. 
+        # Right now, this is hardcoded for session models with an id reducer.
         # In other words, this is for BERT4Rec, SASRec and GRU4Rec.
-        ground_truths = val_data.copy().drop_duplicates(subset=["SessionId"], keep="last").groupby("SessionId")["ItemId"].apply(np.array).to_dict()
-        predict_data = val_data.copy()[val_data.duplicated(["SessionId"], keep="last")].groupby("SessionId")["ItemId"].apply(np.array).to_dict()
+        ground_truths = (
+            val_data.copy()
+            .drop_duplicates(subset=["SessionId"], keep="last")
+            .groupby("SessionId")["ItemId"]
+            .apply(np.array)
+            .to_dict()
+        )
+        predict_data = (
+            val_data.copy()[val_data.duplicated(["SessionId"], keep="last")]
+            .groupby("SessionId")["ItemId"]
+            .apply(np.array)
+            .to_dict()
+        )
         ground_truths = self.id_reducer.to_original(ground_truths)
         predict_data = self.id_reducer.to_original(predict_data)
 
-        metric_callback = MetricCallback(self, NormalizedDiscountedCumulativeGain, predict_data, ground_truths, top_k=20, prefix="inner_val")
+        metric_callback = MetricCallback(
+            self,
+            NormalizedDiscountedCumulativeGain,
+            predict_data,
+            ground_truths,
+            top_k=20,
+            prefix="inner_val",
+        )
         early_stop = tf.keras.callbacks.EarlyStopping(
             monitor="inner_val_NDCG@20",
             patience=self.early_stopping_patience,
@@ -216,8 +235,8 @@ class NeuralModel(Model):
     ) -> keras.utils.Sequence:
         pass
 
-    def split_session_data(self,
-        data: pd.DataFrame, train_val_fraction: float
+    def split_session_data(
+        self, data: pd.DataFrame, train_val_fraction: float
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Splits session train data into a train DataFrame and a validation DataFrame
         based on a train-validation split conveyed as a fraction of the overall train
@@ -234,7 +253,9 @@ class NeuralModel(Model):
         """
         unique_sessions = data["SessionId"].unique()
 
-        num_sessions_val = min(math.ceil(train_val_fraction * len(unique_sessions)), 500)
+        num_sessions_val = min(
+            math.ceil(train_val_fraction * len(unique_sessions)), 500
+        )
 
         sessions_val = set(
             np.random.choice(unique_sessions, size=num_sessions_val, replace=False)

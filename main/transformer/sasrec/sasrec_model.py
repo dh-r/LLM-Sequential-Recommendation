@@ -10,17 +10,15 @@ from main.utils.neural_utils.custom_preprocessors.tensor_factory import (
 
 
 import tensorflow as tf
-from tensorflow import keras 
-import numpy as np
+from tensorflow import keras
 
 
 class SASRecModel(TransformerModel):
-
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         # SASRec additionally uses a dropout layer on the embeddings.
-        self.embedding_dropout = keras.layers.Dropout(self.drop_rate) 
+        self.embedding_dropout = keras.layers.Dropout(self.drop_rate)
 
     def call(self, inputs: tf.Tensor, training: bool) -> tf.Tensor:
         """The call method defines how the input tensor is propagated through the model
@@ -68,7 +66,7 @@ class SASRecModel(TransformerModel):
             self.emb_dim * self.trans_dim_scale,
             self.h,
             self.drop_rate,
-            use_causal_mask=True,
+            use_causal_mask=True,  # important for SASRec!
             activation=self.activation,
             **self.transformer_layer_kwargs,
         )

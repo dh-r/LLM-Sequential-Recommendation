@@ -1,11 +1,5 @@
-from main.utils.neural_utils.custom_preprocessors.cloze import (
-    Cloze,
-)
 from main.utils.neural_utils.custom_preprocessors.tensor_factory import (
     TensorFactory,
-)
-from main.utils.neural_utils.custom_preprocessors.data_description import (
-    DataDescription,
 )
 
 import tensorflow as tf

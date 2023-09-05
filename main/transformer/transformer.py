@@ -16,13 +16,9 @@ from main.utils.config_util import extract_config
 
 import numpy as np
 import pandas as pd
-import tensorflow as tf
-from tensorflow import keras
-from keras import callbacks
 
 import logging
 from typing import Dict, Any
-from abc import abstractmethod
 
 
 class Transformer(NeuralModel):
@@ -43,7 +39,7 @@ class Transformer(NeuralModel):
         h: int = 2,
         emb_dim: int = 64,
         trans_dim_scale: int = 4,
-        transformer_layer_kwargs : dict = {},
+        transformer_layer_kwargs: dict = {},
         drop_rate: float = 0.2,
         optimizer_kwargs: dict = {},
         infer_N_percentile: int = 95,
@@ -61,8 +57,8 @@ class Transformer(NeuralModel):
             emb_dim (int): The dimension of the embedding of each item. Defaults to 64.
             trans_dim_scale (int). The intermediate dimension of the transformer layer
                 as a multiple of the embedding dimension. Defaults to 4.
-            transformer_layer_kwargs (dict, optional): Keyword arguments for the 
-                transformer encoder layer. Defaults to {}. 
+            transformer_layer_kwargs (dict, optional): Keyword arguments for the
+                transformer encoder layer. Defaults to {}.
             drop_rate (float): The drop rate inside the transformer layer.
                 Defaults to 0.2.
             optimizer_kwargs (dict, optional): Keyword arguments for the Adam optimizer.
@@ -192,15 +188,3 @@ class Transformer(NeuralModel):
         return {
             "masked_sparse_categorical_crossentropy": masked_sparse_categorical_crossentropy
         }
-
-    @staticmethod
-    def get_non_config_memvars_to_save() -> list[str]:
-        """Return a list containing the names of the member variables that need to
-        be saved using the standard pickling method.
-
-        Returns:
-            list[str]: The names of the member variables that need to be saved.
-        """
-        non_config_memvars_to_save = NeuralModel.get_non_config_memvars_to_save()
-        non_config_memvars_to_save.extend(["id_reducer", "data_description"])
-        return non_config_memvars_to_save

@@ -9,7 +9,6 @@ from main.utils.neural_utils.custom_layers.projection_head import (
 )
 
 
-import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 
@@ -22,7 +21,7 @@ class GRURecModel(keras.Model):
         num_items: int,
         emb_dim: int,
         hidden_dim: int,
-        drop_rate : float,
+        drop_rate: float,
         optimizer_kwargs: dict,
         activation: str,
     ) -> None:
@@ -40,11 +39,11 @@ class GRURecModel(keras.Model):
                 Essentially, it defines the size of the "memory" of the model.
             hidden_dim (int): The dimension of the hidden state of the GRU
                 layer.
-            drop_rate (float): The drop rate on the input embedding and the output 
+            drop_rate (float): The drop rate on the input embedding and the output
                 of the GRU layer. Defaults to 0.2.
             optimizer_kwargs (dict): The keyword arguments for the Adam optimizer.
             activation (str): The string representation of the activation function used
-                in the network. In GRU4Rec we only use the activation in the projection 
+                in the network. In GRU4Rec we only use the activation in the projection
                 head.
         """
         super().__init__()
@@ -57,17 +56,19 @@ class GRURecModel(keras.Model):
         self.optimizer_kwargs = optimizer_kwargs
 
         # Create Embedding layer.
-        self.embedding_layer = layers.Embedding(input_dim=num_items + 1, output_dim=emb_dim)
+        self.embedding_layer = layers.Embedding(
+            input_dim=num_items + 1, output_dim=emb_dim
+        )
         self.embedding_dropout = layers.Dropout(rate=drop_rate)
-        
+
         # Create GRU layer.
-        self.gru_layer : keras.Sequential = keras.Sequential(
+        self.gru_layer: keras.Sequential = keras.Sequential(
             [
-                layers.GRU(hidden_dim, return_sequences=True), 
-                layers.Dropout(rate=drop_rate)
+                layers.GRU(hidden_dim, return_sequences=True),
+                layers.Dropout(rate=drop_rate),
             ]
         )
-        
+
         # Create output dense layer.
         self.proj_head = ProjectionHead(emb_dim, self.embedding_layer, activation)
 
@@ -112,7 +113,7 @@ class GRURecModel(keras.Model):
         result = self.proj_head(relevant_transformations)
         return result
 
-    def compile_model(self): 
+    def compile_model(self):
         # Construct optimizer and compile.
         adam_w = keras.optimizers.experimental.AdamW(**self.optimizer_kwargs)
         self.compile(adam_w, loss=masked_sparse_categorical_crossentropy)

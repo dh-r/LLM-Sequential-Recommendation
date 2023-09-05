@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 
-from typing import Dict, Union
+from typing import Union
 
 
 class TensorFactory:
@@ -63,80 +63,3 @@ class TensorFactory:
             sequences[i, :] = session
 
         return tf.convert_to_tensor(sequences)
-
-    @classmethod
-    def slice_random(
-        cls, sessions: list[np.ndarray], sequence_length: int, min_session_length: int
-    ) -> list[np.ndarray]:
-        """Gets random slices from the sessions.
-
-        For example, a session [1, 2, 3, 4, 5] could be sliced into
-        [2, 3, 4], [1, 2], or [3, 4, 5], but never into a session larger than
-        sequence_length.
-
-        Args:
-            sessions (list[np.ndarray]): _description_
-            sequence_length (int): _description_
-
-        Returns:
-            list[np.ndarray]: _description_
-        """
-
-        # Get random lengths
-        max_session_length = sequence_length
-
-        # Generate a probability distribution from the min_session_length to max_session_length
-        unnormalized_min_prob = 1
-        unnormalized_max_prob = 2
-        unnormalized_probabilities = np.linspace(
-            start=unnormalized_min_prob,
-            stop=unnormalized_max_prob,
-            num=max_session_length - min_session_length + 1,
-        )
-        normalized_probabilities = unnormalized_probabilities / np.sum(
-            unnormalized_probabilities
-        )
-
-        # Generate a list of new session lengths for each session.
-        new_session_lengths = np.random.choice(
-            a=np.arange(min_session_length, max_session_length + 1),
-            size=len(sessions),
-            replace=True,
-            p=normalized_probabilities,
-        )
-
-        # For each session, get a random offset, and add to new_sessions.
-        new_sessions = []
-        for session, new_length in zip(sessions, new_session_lengths):
-            max_offset = max(len(session) - new_length + 1, 1)
-            new_offset = cls.RNG.integers(0, max_offset)
-            new_sessions.append(session[new_offset : new_offset + new_length])
-
-        return new_sessions
-
-    def slice_full(sessions: list[np.ndarray], sequence_length: int):
-        new_sessions = []
-        min_length = sequence_length
-        for session in sessions:
-            if len(session) > min_length + 1:
-                for length in range(6, max(len(session) + 1, sequence_length + 1)):
-                    max_offset = max(len(session) - length + 1, 1)
-                    for offset in range(max_offset):
-                        new_sessions.append(session[offset : offset + length])
-            else:
-                new_sessions.append(session)
-        return new_sessions
-
-    def random_subset(sessions: list[np.ndarray], sequence_length: int):
-        new_sessions = []
-        for session in sessions:
-            new_session_indices = np.sort(
-                np.random.choice(
-                    np.arange(0, len(session)),
-                    size=min(sequence_length, len(session)),
-                    replace=False,
-                )
-            )
-            new_sessions.append(session[new_session_indices])
-
-        return new_sessions

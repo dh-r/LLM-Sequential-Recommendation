@@ -41,7 +41,7 @@ class BERTModel(TransformerModel):
             self.emb_dim * self.trans_dim_scale,
             self.h,
             self.drop_rate,
-            use_causal_mask=False,
+            use_causal_mask=False,  # important for BERT4Rec!
             activation=self.activation,
             **self.transformer_layer_kwargs,
         )

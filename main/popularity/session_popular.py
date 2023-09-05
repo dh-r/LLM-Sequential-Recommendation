@@ -64,15 +64,3 @@ class SessionBasedPopular(Model):
 
     def name(self) -> str:
         return "Popularity"
-
-    @staticmethod
-    def get_non_config_memvars_to_save() -> list[str]:
-        """Return a list containing the names of the member variables that need to
-        be saved using the standard pickling method.
-
-        Returns:
-            list[str]: The names of the member variables that need to be saved.
-        """
-        non_config_memvars_to_save = Model.get_non_config_memvars_to_save()
-        non_config_memvars_to_save.extend(["items", "n_items"])
-        return non_config_memvars_to_save

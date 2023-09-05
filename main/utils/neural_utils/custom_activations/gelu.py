@@ -2,8 +2,11 @@ import tensorflow as tf
 
 
 def gelu(x: tf.Tensor) -> tf.Tensor:
-    # https://github.com/FeiSun/BERT4Rec/blob/615eaf2004abecda487a38d5b0c72f3dcfcae5b3/modeling.py
     """Gaussian Error Linear Unit.
+
+    Taken from the original BERT4Rec implementation at
+    https://github.com/FeiSun/BERT4Rec/blob/615eaf2004abecda487a38d5b0c72f3dcfcae5b3/modeling.py
+
     This is a smoother version of the RELU.
     Original paper: https://arxiv.org/abs/1606.08415
     Args:

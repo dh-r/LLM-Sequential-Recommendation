@@ -1,7 +1,4 @@
 from main.abstract_model import Model
-from main.data.abstract_dataset import Dataset
-from main.eval.evaluation import Evaluation
-from main.eval import metrics
 from main.eval.metrics.metric import (
     RankingMetric,
     MetricDependency,
@@ -21,7 +18,7 @@ class MetricCallback(callbacks.Callback):
         predict_data: Union[np.ndarray, dict[int, np.ndarray], None],
         ground_truths: dict[int, np.ndarray],
         top_k: int,
-        prefix : str = "",
+        prefix: str = "",
         dependencies: dict[MetricDependency, Any] = {},
         cores: int = 1,
     ):
@@ -29,7 +26,7 @@ class MetricCallback(callbacks.Callback):
 
         Args:
             main_model (Model): The model to evaluate.
-            metric_cls (RankingMetric): The metric class to evaluate. 
+            metric_cls (RankingMetric): The metric class to evaluate.
             predict_data (Union[np.ndarray, dict[int, np.ndarray], None]):
                 The data that is passed to the predict method of the model.
             ground_truths (dict[int, np.ndarray]): The ground-truths corresponding

@@ -37,44 +37,6 @@ class Cloze:
         mask: np.ndarray = np.random.binomial(1, mask_prob, data.shape)
         return self.__convert_train(data, mask)
 
-    def mask_recent(
-        self, data: tf.Tensor, mask_prob: float
-    ) -> Tuple[tf.Tensor, tf.Tensor]:
-        """Randomly masks items in the sequence, where the probability of an item
-        getting masked increases with its position in the sequence.
-
-        Args:
-            data (tf.Tensor): The input sequences.
-            mask_prob (float): The average probability that a particular item in the
-                sequence is masked. Here, average is emphasized, because the
-                probabilities differ per position.
-
-        Raises:
-            Exception: Raise exception if MASK_TARGET has not yet been set.
-
-        Returns:
-            Tuple[tf.Tensor, tf.Tensor]: Tuple of the form (train_data, true_data),
-                where the former represents the sequences with masked items, and the
-                latter represents the sequences with the true label of the masked items.
-        """
-        N = data.shape[1]
-        mask_list = []
-        skewness = (
-            0.2  # difference between prob of first item / last item being masked.
-        )
-        step_size = skewness / (N - 1)
-        position_to_prob = np.arange(
-            start=mask_prob - skewness / 2,
-            stop=mask_prob + skewness / 2 + step_size,
-            step=step_size,
-        )
-        for pos in range(N):
-            prob = position_to_prob[pos]
-            mask_column = np.random.binomial(1, prob, data.shape[0])
-            mask_list.append(mask_column)
-        mask: np.ndarray = np.array(mask_list).T
-        return self.__convert_train(data, mask)
-
     def mask_last(self, data: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
         """Masks the last item in the sequence.
 
@@ -90,26 +52,6 @@ class Cloze:
                 latter represents the sequences with the true label of the masked items.
         """
         mask: np.ndarray = np.zeros(data.shape)
-        mask[:, -1] = 1
-        return self.__convert_train(data, mask)
-
-    def mask_last_and_random(
-        self, data: tf.Tensor, mask_prob: float
-    ) -> Tuple[tf.Tensor, tf.Tensor]:
-        """Masks the last item and random items in the sequence.
-
-        Args:
-            data (tf.Tensor): The input sequences.
-            mask_prob (float): The probability that a particular item in the sequence
-                is masked, except for the last item whose probability of being masked
-                is exactly 1.
-
-        Returns:
-            Tuple[tf.Tensor, tf.Tensor]: Tuple of the form (train_data, true_data),
-                where the former represents the sequences with masked items, and the
-                latter represents the sequences with the true label of the masked items.
-        """
-        mask: np.ndarray = np.random.binomial(1, mask_prob, data.shape)
         mask[:, -1] = 1
         return self.__convert_train(data, mask)
 

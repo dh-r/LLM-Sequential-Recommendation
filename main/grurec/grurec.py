@@ -34,8 +34,8 @@ class GRURec(NeuralModel):
         pred_seen: bool = False,
         **neural_model_kwargs: dict,
     ):
-        """The GRU4Rec model. 
-        
+        """The GRU4Rec model.
+
         The implementation mostly follows the original
         [the paper introducing GRU to the recommendation domain](https://arxiv.org/pdf/1511.06939.pdf).
 
@@ -50,7 +50,7 @@ class GRURec(NeuralModel):
                 Defaults to 64.
             hidden_dim (int, optional): The dimension of the hidden state of the GRU
                 layer. Defaults to 128.
-            drop_rate (float, optional): The drop rate on the input embedding and the output 
+            drop_rate (float, optional): The drop rate on the input embedding and the output
                 of the GRU layer. Defaults to 0.2.
             optimizer_kwargs (dict, optional): Keyword arguments for the Adam optimizer.
                 Defaults to {}.
@@ -159,7 +159,12 @@ class GRURec(NeuralModel):
     def get_keras_model(self, data: dict[int, np.ndarray]) -> keras.Model:
         num_items = self.data_description["num_items"]
         return GRURecModel(
-            num_items, self.emb_dim, self.hidden_dim, self.drop_rate, self.optimizer_kwargs, self.activation
+            num_items,
+            self.emb_dim,
+            self.hidden_dim,
+            self.drop_rate,
+            self.optimizer_kwargs,
+            self.activation,
         )
 
     def get_train_generator(
@@ -172,7 +177,7 @@ class GRURec(NeuralModel):
     ) -> keras.utils.Sequence:
         return NextItemTestGenerator(
             data, self.N, batch_size, for_prediction=for_prediction
-        )    
+        )
 
     def name(self) -> str:
         return "GRU4Rec"

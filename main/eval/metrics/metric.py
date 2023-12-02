@@ -355,8 +355,7 @@ class RankingMetric(ABC):
         dependencies: Dict[MetricDependency, Any],
         cores: int,
     ) -> Union[float, Any]:
-        """Utility method to run the actual model and evaluate its results.
-        """
+        """Utility method to run the actual model and evaluate its results."""
         model.train(train_data)
 
         recommendations = model.predict(test_data_labels, top_k=top_k)

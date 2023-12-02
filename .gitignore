@@ -6,5 +6,6 @@ beauty/meta_Beauty.json
 beauty/reviews_Beauty.json
 *.idea
 *.ipynb_checkpoints
-main/openai/openai_utils/openai_embeddings_cache.pkl
-main/openai/openai_utils/real_key.txt
+main/llm_based/embedding_utils/openai_embeddings_cache.pkl
+main/llm_based/embedding_utils/palm_embeddings_cache.pkl
+main/llm_based/embedding_utils/real_key.txt

@@ -599,7 +599,6 @@ class SessionBasedCF(Model):
         return global_time_ordered_session_ids[
             np.isin(global_time_ordered_session_ids, possible_neighbors)
         ][-sample_size:]
-    
 
     @staticmethod
     def _get_k_neighbors(

@@ -14,20 +14,22 @@ from enum import Enum
 #     merge_padding_and_attention_mask,
 # )
 
+
 class TransformerEncoderLayerLayout(str, Enum):
     """There are some discrepancies between transformer architectures in the literature.
-    We accomodate both by letting users pass the layout as a parameter. 
+    We accomodate both by letting users pass the layout as a parameter.
 
     Currently we support 2 layouts from different papers:
-        0. [BERT4REC](https://dl.acm.org/doi/abs/10.1145/3357384.3357895), originally from 
+        0. [BERT4REC](https://dl.acm.org/doi/abs/10.1145/3357384.3357895), originally from
                 [Attention is All You Need](https://arxiv.org/abs/1706.03762)
         1. [SASRec paper](https://arxiv.org/abs/1808.09781).
 
-    We use the ordering of the components as the abbreviation of the corresponding 
-    layout. 
+    We use the ordering of the components as the abbreviation of the corresponding
+    layout.
     """
-    FDRN = 0 # function (mha, ffn), dropout, residual connection, then normalization 
-    NFDR = 1 # normalization, function, dropout, residual connection 
+
+    FDRN = 0  # function (mha, ffn), dropout, residual connection, then normalization
+    NFDR = 1  # normalization, function, dropout, residual connection
 
     @staticmethod
     def from_str(label):
@@ -49,8 +51,8 @@ class TransformerEncoderLayer(keras.layers.Layer):
         dropout: float, defaults to 0. the dropout value, shared by
             `keras.layers.MultiHeadAttention` and feedforward network.
         activation: The string representation of the activation function used
-                in the network. In the transformer layer we use this for the 
-                feedforward network inside the layer. 
+                in the network. In the transformer layer we use this for the
+                feedforward network inside the layer.
         layer_norm_epsilon: float, defaults to 1e-5. The epsilon value in layer
             normalization components.
         kernel_initializer: string or `keras.initializers` initializer,
@@ -72,9 +74,9 @@ class TransformerEncoderLayer(keras.layers.Layer):
         num_heads: int,
         dropout: float,
         use_causal_mask: bool,
-        activation : str,
+        activation: str,
         layer_norm_epsilon: float = 1e-05,
-        layout : TransformerEncoderLayerLayout = TransformerEncoderLayerLayout.FDRN,
+        layout: TransformerEncoderLayerLayout = TransformerEncoderLayerLayout.FDRN,
         name: str = None,
         **kwargs,
     ):
@@ -108,7 +110,11 @@ class TransformerEncoderLayer(keras.layers.Layer):
         self.supports_masking = False
 
         self.use_causal_mask = use_causal_mask
-        self.layout = layout if isinstance(layout, TransformerEncoderLayerLayout) else TransformerEncoderLayerLayout.from_str(layout)
+        self.layout = (
+            layout
+            if isinstance(layout, TransformerEncoderLayerLayout)
+            else TransformerEncoderLayerLayout.from_str(layout)
+        )
 
     def build(self, input_shape):
         # Create layers based on input shape.
@@ -147,7 +153,7 @@ class TransformerEncoderLayer(keras.layers.Layer):
         )
         self._ff_do = keras.layers.Dropout(rate=self.dropout)
 
-    def _mha(self, inputs): 
+    def _mha(self, inputs):
         # Self attention.
         # The MHA layer performs three separate linear transformations on the
         # inputs, one for the queries of the attention, one for the keys of the
@@ -156,7 +162,7 @@ class TransformerEncoderLayer(keras.layers.Layer):
         return self._mha_layer(
             inputs, inputs, inputs, use_causal_mask=self.use_causal_mask
         )
-    
+
     def _ff(self, input):
         x = self._intm_dense(input)
         x = self._output_dense(x)
@@ -175,10 +181,10 @@ class TransformerEncoderLayer(keras.layers.Layer):
         if not self._built:
             self._build(inputs.shape)
 
-        if self.layout == TransformerEncoderLayerLayout.FDRN: 
+        if self.layout == TransformerEncoderLayerLayout.FDRN:
             attended = self._att_norm(inputs + self._att_do(self._mha(inputs)))
             result = self._ff_norm(attended + self._ff_do(self._ff(attended)))
-        elif self.layout == TransformerEncoderLayerLayout.NFDR: 
+        elif self.layout == TransformerEncoderLayerLayout.NFDR:
             attended = inputs + self._att_do(self._mha(self._att_norm(inputs)))
             result = attended + self._ff_do(self._ff(self._ff_norm(attended)))
 

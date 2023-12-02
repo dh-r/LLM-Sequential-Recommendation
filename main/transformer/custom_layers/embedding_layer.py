@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow import keras
-from keras import layers 
+from keras import layers
+
 
 class EmbeddingLayer(layers.Layer):
     """The embedding layer implementation as described in the original
@@ -22,7 +23,7 @@ class EmbeddingLayer(layers.Layer):
         )
         self.pos_emb: layers.Embedding = layers.Embedding(
             input_dim=N,
-            output_dim=emb_dim, 
+            output_dim=emb_dim,
         )
 
     def call(self, x) -> tf.Tensor:

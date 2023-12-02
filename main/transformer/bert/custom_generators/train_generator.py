@@ -52,7 +52,7 @@ class TrainGenerator(keras.utils.Sequence):
         return math.ceil(self.train_input.shape[0] / self.batch_size)
 
     def __getitem__(self, batch_index):
-        """Method to support iteration over the data. """
+        """Method to support iteration over the data."""
         # Get indices for this batch
         start_index = batch_index * self.batch_size
         end_index = (batch_index + 1) * self.batch_size

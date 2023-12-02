@@ -54,11 +54,11 @@ class BERTWithEmbeddings(BERT):
         }
 
     def train(self, train_data: Any) -> None:
-        # If we use pre-computed weights, we do not have to do anything special 
+        # If we use pre-computed weights, we do not have to do anything special
         # in this class, and can just use the functionality from BERT.
         if self.filepath_weights is not None:
             super().train(train_data)
-            return 
+            return
 
         temp_config = self.bert_config.copy()
 
@@ -66,8 +66,8 @@ class BERTWithEmbeddings(BERT):
 
         self.temp_model = BERT(**temp_config)
 
-        # We do not actually train here, this is just for initializing the variables 
-        # we need. 
+        # We do not actually train here, this is just for initializing the variables
+        # we need.
         self.temp_model.train(train_data)
 
         pca = PCA(n_components=self.emb_dim)
@@ -101,20 +101,19 @@ class BERTWithEmbeddings(BERT):
         super().train(train_data)
 
     def get_keras_model(self, data: pd.DataFrame) -> Model:
-        # If we use pre-computed weights, we do not have to do anything special 
+        # If we use pre-computed weights, we do not have to do anything special
         # in this class, and can just use the functionality from BERT.
         if self.filepath_weights is not None:
             return super().get_keras_model(data)
 
         return self.temp_model.model
 
-
     def predict(self, predict_data: Any, top_k: int = 10) -> dict[int, np.ndarray]:
-        # If we use pre-computed weights, we do not have to do anything special 
+        # If we use pre-computed weights, we do not have to do anything special
         # in this class, and can just use the functionality from BERT.
         if self.filepath_weights is not None:
             return super().predict(predict_data, top_k)
-        
+
         return self.temp_model.predict(predict_data, top_k)
 
     def name(self) -> str:

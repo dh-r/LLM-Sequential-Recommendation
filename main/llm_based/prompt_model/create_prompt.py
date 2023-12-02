@@ -11,7 +11,8 @@ def create_prompt_completion_from_session(
     )
 
     input_item_names = [
-        f"{i + 1}. {product_id_to_name[item]} \n" for i, item in enumerate(train_session)
+        f"{i + 1}. {product_id_to_name[item]} \n"
+        for i, item in enumerate(train_session)
     ]
     prompt = "".join(input_item_names) + " \n\n###\n\n"
 
@@ -30,10 +31,10 @@ def create_prompt_completion_from_session(
             for i, item in enumerate(true_items)
         ]
         completion = "".join(true_item_names) + " ###"
-    
-    # We add a space because it could improve performance according to the 
-    # openAI docs. Our preliminary results showed it indeed caused some additional 
-    # performance. 
+
+    # We add a space because it could improve performance according to the
+    # openAI docs. Our preliminary results showed it indeed caused some additional
+    # performance.
     completion = " " + completion
 
     return prompt, completion

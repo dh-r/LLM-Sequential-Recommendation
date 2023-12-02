@@ -32,9 +32,9 @@ class TransformerModel(keras.Model):
         emb_dim: int,
         trans_dim_scale: int,
         drop_rate: float,
-        activation : str,
+        activation: str,
         optimizer_kwargs: dict,
-        transformer_layer_kwargs : dict,
+        transformer_layer_kwargs: dict,
         num_items: int,
     ) -> None:
         """The base Transformer model.
@@ -49,11 +49,11 @@ class TransformerModel(keras.Model):
                 as a multiple of the embedding dimension.
             drop_rate (float): The drop rate inside the transformer layer.
             activation (str): The string representation of the activation function used
-                in the network. In the transformer models we use this for the 
-                feedforward networks inside the transformer encoder layers and for 
+                in the network. In the transformer models we use this for the
+                feedforward networks inside the transformer encoder layers and for
                 the projection head.
             optimizer_kwargs (dict, optional): Keyword arguments for the Adam optimizer.
-            transformer_layer_kwargs (dict, optional): Keyword arguments for the 
+            transformer_layer_kwargs (dict, optional): Keyword arguments for the
                 transformer encoder layer.
             num_items (int): The number of unique items in the data.
         """
@@ -66,9 +66,9 @@ class TransformerModel(keras.Model):
         self.emb_dim: int = emb_dim
         self.trans_dim_scale = trans_dim_scale
         self.drop_rate: float = drop_rate
-        self.activation : str = activation
-        self.optimizer_kwargs : dict = optimizer_kwargs
-        self.transformer_layer_kwargs : dict = transformer_layer_kwargs
+        self.activation: str = activation
+        self.optimizer_kwargs: dict = optimizer_kwargs
+        self.transformer_layer_kwargs: dict = transformer_layer_kwargs
         self.num_items: int = num_items
         self.mask_target_used = self.num_items  # for clarity
 
@@ -98,7 +98,9 @@ class TransformerModel(keras.Model):
         pass
 
     def get_projection_head(self):
-        return ProjectionHead(self.emb_dim, self.embedding_layer.item_emb, self.activation)
+        return ProjectionHead(
+            self.emb_dim, self.embedding_layer.item_emb, self.activation
+        )
 
     def get_optimizer(self):
         return tf.keras.optimizers.experimental.AdamW(**self.optimizer_kwargs)

@@ -58,7 +58,6 @@ class Model(ABC):
         """
         pass
 
-
     @abstractmethod
     def name(self) -> str:
         """Name of the model.

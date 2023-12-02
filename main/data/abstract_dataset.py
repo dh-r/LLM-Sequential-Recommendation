@@ -313,9 +313,7 @@ class Dataset(ABC):
                 initialized.
         """
         if not self.has_test_data_eval():
-            raise Exception(
-                "Test data evaluation tuple has not been initialized."
-            )
+            raise Exception("Test data evaluation tuple has not been initialized.")
         return self.test_data_eval
 
     def get_test_prompts(self) -> Any:
@@ -381,9 +379,7 @@ class Dataset(ABC):
             Exception: If k_fold_eval list is empty.
         """
         if not self.has_k_fold_eval():
-            raise Exception(
-                "k-folds evaluation tuple list has not been initialized."
-            )
+            raise Exception("k-folds evaluation tuple list has not been initialized.")
         return self.k_fold_eval
 
     def has_k_fold_eval(self) -> bool:

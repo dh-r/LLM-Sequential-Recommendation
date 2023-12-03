@@ -7,12 +7,13 @@ from collections import Counter
 
 import openai
 
+from main.data.session_dataset import *
+from main.llm_based.embedding_utils import openai_utils
 from main.llm_based.prompt_model.create_prompt import (
     create_prompt_completion_from_session,
 )
-from main.data.session_dataset import *
-from main.llm_based.embedding_utils import openai_utils
 from main.utils.top_k_computer import TopKComputer
+from paths import ROOT_DIR
 
 parser = argparse.ArgumentParser(description="Predict using a finetuned model.")
 parser.add_argument("--working-dir", dest="working_dir")
@@ -40,7 +41,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-WORKING_DIR = args.working_dir
+WORKING_DIR = f"{ROOT_DIR}/{args.working_dir}"
 MODEL_NAME = args.model_name
 EMBEDDINGS_NAME = args.embeddings_name
 TOP_K = args.top_k
@@ -120,7 +121,7 @@ recs_filename = f"{total_model_name}_recs.pickle"
 session_id_to_value_counts = {}
 
 try:
-    with open(recs_filename, "rb") as f:
+    with open(f"{WORKING_DIR}/{recs_filename}", "rb") as f:
         session_id_to_value_counts = pickle.loads(f.read())
 except:
     # Create batches of the prompts.
@@ -187,7 +188,7 @@ except:
 
         cur_step += step_size
 
-    with open(recs_filename, "wb") as f:
+    with open(f"{WORKING_DIR}/{recs_filename}", "wb") as f:
         pickle.dump(session_id_to_value_counts, f)
 
 to_embed = set()
@@ -315,19 +316,19 @@ for session_id, value_counts in session_id_to_value_counts.items():
     if random.randint(0, 100) == 50:
         print(f"Num sessions done: {num_sessions_done}", end="\r")
 
-        # print(f"Session: {[product_id_to_name[item] for item in test[session_id]]}")
-    # print(f"Converted {value_counts} to {[product_id_to_name[item] for item in session_recommendations]}")
-
     recommendations.update({session_id: session_recommendations})
 
 predictions_pickle: bytes = pickle.dumps(recommendations)
 
 filename = f"recs_openai_{total_model_name}"
 
-with open(f"{total_model_name}_statistics.txt", "w") as f:
+with open(f"{WORKING_DIR}/{total_model_name}_statistics.txt", "w") as f:
     f.write(
-        f"num_unknown = {num_unknown_recommendations} \n num_known = {num_known_recommendations} \n num_duplicate = {num_duplicate_recommendations} \n num_total = {num_total_recommendations}"
+        f"num_unknown = {num_unknown_recommendations}"
+        f"\nnum_known = {num_known_recommendations}"
+        f"\nnum_duplicate = {num_duplicate_recommendations}"
+        f"\nnum_total = {num_total_recommendations}"
     )
 
-with open(f"{filename}.pickle", "wb") as file:
+with open(f"{WORKING_DIR}/{filename}.pickle", "wb") as file:
     file.write(predictions_pickle)

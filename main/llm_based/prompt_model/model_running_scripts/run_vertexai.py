@@ -43,7 +43,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 WORKING_DIR = args.working_dir
-MODEL_NAME = args.endpoint_name
+MODEL_NAME = args.endpoint_id
 PROJECT = args.project
 LOCATION = args.location
 EMBEDDINGS_NAME = args.embeddings_name

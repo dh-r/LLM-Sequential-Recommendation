@@ -59,9 +59,7 @@ N_QUERIES = TOP_K / 5  # TODO a more robust logic could be better
 
 total_model_name = f"{MODEL_NAME}_temp_{TEMPERATURE}_top_p_{TOP_P}"
 
-product_embeddings = pd.read_csv(
-    f"{WORKING_DIR}/{EMBEDDINGS_NAME}.csv.gz", compression="gzip"
-)
+product_embeddings = pd.read_csv(f"{WORKING_DIR}/{EMBEDDINGS_NAME}")
 product_id_to_name = (
     product_embeddings[["global_product_id", "name"]]
     .set_index("global_product_id")

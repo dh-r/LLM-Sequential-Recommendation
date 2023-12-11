@@ -23,13 +23,13 @@ def predict_with_vertexai_model(
 
     Args:
         endpoint_id: A string indicating the endpoint id of the model.
+        project: A string indicating the GCP project that hosts the model.
+        location: A string indicating the location of the model in GCP.
         prompts: A list of strings containing the prompts for each prediction.
         temperature: A float indicating the temperature parameter.
         top_p: A float indicating the top_p parameter.
         top_k: An in indicating the top_k parameter.
-        stop_sequence: A st
-        project: A string indicating the GCP project that hosts the model.
-        location: A string indicating the location of the model in GCP.
+        stop_sequence: A string indicating the stop sequence.
 
     Returns:
         A list that contains a list of predictions for each prompt.

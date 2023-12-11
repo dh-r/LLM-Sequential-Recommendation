@@ -19,6 +19,8 @@ parser.add_argument(
     "--endpoint-id",
     dest="endpoint_id",
 )
+parser.add_argument("--project")
+parser.add_argument("--location")
 parser.add_argument(
     "--embeddings-name",
     dest="embeddings_name",
@@ -42,6 +44,8 @@ args = parser.parse_args()
 
 WORKING_DIR = args.working_dir
 MODEL_NAME = args.endpoint_name
+PROJECT = args.project
+LOCATION = args.location
 EMBEDDINGS_NAME = args.embeddings_name
 TOP_K = args.top_k
 TEMPERATURE = args.temperature
@@ -69,9 +73,9 @@ product_name_to_id = (
     .to_dict()["global_product_id"]
 )
 product_index_to_embedding = (
-    product_embeddings[["global_product_id", "ada_embedding"]]
+    product_embeddings[["global_product_id", "embedding"]]
     .set_index("global_product_id")
-    .to_dict()["ada_embedding"]
+    .to_dict()["embedding"]
 )
 product_index_to_embedding = {
     k: np.array(json.loads(v)) for k, v in product_index_to_embedding.items()
@@ -157,6 +161,8 @@ except:
             try:
                 predictions = predict_with_vertexai_model(
                     endpoint_id=MODEL_NAME,
+                    project=PROJECT,
+                    location=LOCATION,
                     prompts=cur_prompts,
                     temperature=TEMPERATURE,
                     top_p=TOP_P,
@@ -165,11 +171,14 @@ except:
                 all_preds.append(predictions)
             except Exception as e:
                 print(
-                    f"Failed call to openAI with exception {e}, trying again in 40 seconds.."
+                    f"Failed call to VertexAI with exception {e}, trying again in 20"
+                    " seconds..."
                 )
-                time.sleep(40)
+                time.sleep(20)
                 predictions = predict_with_vertexai_model(
                     endpoint_id=MODEL_NAME,
+                    project=PROJECT,
+                    location=LOCATION,
                     prompts=cur_prompts,
                     temperature=TEMPERATURE,
                     top_p=TOP_P,

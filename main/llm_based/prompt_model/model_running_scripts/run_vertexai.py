@@ -5,12 +5,12 @@ import random
 import time
 from collections import Counter
 
-from main.llm_based.prompt_model.predict_vertexai import predict_with_vertexai_model
+from main.data.session_dataset import *
+from main.llm_based.embedding_utils import palm_utils
 from main.llm_based.prompt_model.create_prompt import (
     create_prompt_completion_from_session,
 )
-from main.data.session_dataset import *
-from main.llm_based.embedding_utils import palm_utils
+from main.llm_based.prompt_model.predict_vertexai import predict_with_vertexai_model
 from main.utils.top_k_computer import TopKComputer
 
 parser = argparse.ArgumentParser(description="Predict using a finetuned model.")
@@ -52,6 +52,8 @@ TEMPERATURE = args.temperature
 TOP_P = args.top_p
 
 print(f"Configuration:\n{args}")
+
+start_time = time.time()
 
 # The maximum predictions per prompt is 8 in vertex ai. We usually operate with @10 and
 # @20 recommendations, so we use 5 predictions in our query for simplicity.
@@ -323,3 +325,7 @@ with open(f"{total_model_name}_statistics.txt", "w") as f:
 
 with open(f"{filename}.pickle", "wb") as file:
     file.write(predictions_pickle)
+
+end_time = time.time()
+elapsed_time = end_time - start_time
+print(f"Script total runtime: {elapsed_time} seconds")

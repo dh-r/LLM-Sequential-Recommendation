@@ -1,3 +1,5 @@
+import time
+
 from google.cloud import aiplatform
 from google.protobuf import json_format
 from google.protobuf.struct_pb2 import Value
@@ -56,13 +58,19 @@ def predict_with_vertexai_model(
     )
     all_predictions = []
     for i in instances:
-        response = client.predict(
-            endpoint=endpoint, instances=[i], parameters=parameters
-        )
-        predictions = [
-            remove_stop_sequence(dict(p)["content"], stop_sequence).strip()
-            for p in response.predictions
-        ]
+        while True:
+            try:
+                response = client.predict(
+                    endpoint=endpoint, instances=[i], parameters=parameters
+                )
+                predictions = [
+                    remove_stop_sequence(dict(p)["content"], stop_sequence).strip()
+                    for p in response.predictions
+                ]
+                break
+            except Exception as e:
+                print(f"Got an error {e}, trying again in 10 seconds...")
+                time.sleep(10)
         all_predictions.append(predictions)
     return all_predictions
 

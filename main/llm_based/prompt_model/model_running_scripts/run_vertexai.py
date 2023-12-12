@@ -55,7 +55,7 @@ print(f"Configuration:\n{args}")
 
 # The maximum predictions per prompt is 8 in vertex ai. We usually operate with @10 and
 # @20 recommendations, so we use 5 predictions in our query for simplicity.
-N_QUERIES = TOP_K / 5  # TODO a more robust logic could be better
+N_QUERIES = TOP_K // 5  # TODO a more robust logic could be better
 
 total_model_name = f"{MODEL_NAME}_temp_{TEMPERATURE}_top_p_{TOP_P}"
 
@@ -156,33 +156,16 @@ except:
 
         all_preds = []
         for i in range(N_QUERIES):
-            try:
-                predictions = predict_with_vertexai_model(
-                    endpoint_id=MODEL_NAME,
-                    project=PROJECT,
-                    location=LOCATION,
-                    prompts=cur_prompts,
-                    temperature=TEMPERATURE,
-                    top_p=TOP_P,
-                    stop_sequence="###",
-                )
-                all_preds.append(predictions)
-            except Exception as e:
-                print(
-                    f"Failed call to VertexAI with exception {e}, trying again in 20"
-                    " seconds..."
-                )
-                time.sleep(20)
-                predictions = predict_with_vertexai_model(
-                    endpoint_id=MODEL_NAME,
-                    project=PROJECT,
-                    location=LOCATION,
-                    prompts=cur_prompts,
-                    temperature=TEMPERATURE,
-                    top_p=TOP_P,
-                    stop_sequence="###",
-                )
-                all_preds.append(predictions)
+            predictions = predict_with_vertexai_model(
+                endpoint_id=MODEL_NAME,
+                project=PROJECT,
+                location=LOCATION,
+                prompts=cur_prompts,
+                temperature=TEMPERATURE,
+                top_p=TOP_P,
+                stop_sequence="###",
+            )
+            all_preds.append(predictions)
 
         predicted_item_names = [list(sum(sub_recs, [])) for sub_recs in zip(*all_preds)]
         for session_id, session_predicted_item_names in zip(

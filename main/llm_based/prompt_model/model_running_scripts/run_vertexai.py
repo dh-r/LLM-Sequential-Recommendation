@@ -6,7 +6,7 @@ import time
 from collections import Counter
 
 from main.data.session_dataset import *
-from main.llm_based.embedding_utils import palm_utils
+from main.llm_based.embedding_utils import openai_utils
 from main.llm_based.prompt_model.create_prompt import (
     create_prompt_completion_from_session,
 )
@@ -192,7 +192,7 @@ num_total_recommendations = 0
 for session_id, value_counts in session_id_to_value_counts.items():
     for item_name in value_counts.keys():
         # If an item is not in the catalog, we need to embed it.
-        if not (palm_utils.in_cache(item_name)):
+        if not (openai_utils.in_cache(item_name)):
             to_embed.add(item_name)
         num_total_recommendations += value_counts[item_name]
         if item_name not in product_name_to_id:
@@ -220,7 +220,7 @@ num_batches_processed = 0
 # can be used in the following code immediately.
 while not (batch_product_lookup.empty):
     print(f"Currently at {cur_step} of {len(to_embed)}")
-    palm_utils.set_embeddings_from_df(batch_product_lookup)
+    openai_utils.set_embeddings_from_df(batch_product_lookup)
     processed_batches.append(batch_product_lookup)
 
     batch_product_lookup = to_embed.iloc[cur_step : cur_step + step_size]
@@ -243,13 +243,13 @@ for session_id, value_counts in session_id_to_value_counts.items():
         if count > 1 or item_name not in product_name_to_id:
             # Assert that the item is in the cache, otherwise we would
             # retrieve these embeddings from openAI again, which is slow and expensive.
-            if not palm_utils.in_cache(item_name):
+            if not openai_utils.in_cache(item_name):
                 # This always happens when item_name is an empty string, so we just
                 # create a zero embedding.
                 item_embedding = np.zeros((1, 1024 + 512))
             else:
                 # Get item similarity using embedding
-                item_embedding = palm_utils.embedding_from_string(item_name)
+                item_embedding = openai_utils.embedding_from_string(item_name)
                 if isinstance(item_embedding, str):
                     item_embedding = json.loads(item_embedding)
 

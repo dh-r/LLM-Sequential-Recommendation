@@ -1,21 +1,17 @@
-import logging
-import numpy as np
-import math
-import pandas as pd
 import itertools
-import tensorflow as tf
+import logging
+import math
+from abc import abstractmethod
+from typing import Tuple, Any, Union
 
-from tensorflow import keras
+import numpy as np
+import pandas as pd
+import tensorflow as tf
 from scipy.sparse import csr_matrix
 from tenacity import retry, stop_after_attempt, wait_random
-from typing import Tuple, Any, Union
-from abc import abstractmethod
+from tensorflow import keras
 
 from main.abstract_model import Model
-from main.utils.neural_utils.custom_callbacks.metric_callback import (
-    MetricCallback,
-)
-from main.eval.metrics.ndcg import NormalizedDiscountedCumulativeGain
 
 
 class NeuralModel(Model):
@@ -145,13 +141,21 @@ class NeuralModel(Model):
         ground_truths = self.id_reducer.to_original(ground_truths)
         predict_data = self.id_reducer.to_original(predict_data)
 
+        # TODO These imports are here to avoid circular import.
+        from main.eval.metrics.ndcg import (
+            NormalizedDiscountedCumulativeGain,
+        )
+        from main.utils.neural_utils.custom_callbacks.metric_callback import (
+            MetricCallback,
+        )
+
         metric_callback = MetricCallback(
             self,
             NormalizedDiscountedCumulativeGain,
             predict_data,
             ground_truths,
             top_k=20,
-            prefix="inner_val",
+            prefix="inner_val_",
         )
         early_stop = tf.keras.callbacks.EarlyStopping(
             monitor="inner_val_NDCG@20",
@@ -233,6 +237,23 @@ class NeuralModel(Model):
     def get_train_generator(
         self, data: Union[csr_matrix, pd.DataFrame], batch_size: int
     ) -> keras.utils.Sequence:
+        pass
+
+    @classmethod
+    @abstractmethod
+    def get_custom_keras_objects(cls: type["NeuralModel"]) -> dict[str, Any]:
+        """Get the custom Keras objects that are necessary to load the model
+        back into memory. This is necessary when a model does not use standard Keras
+        components like layers or loss functions.
+
+        Args:
+            cls (type[NeuralModel]): The class of the model for which to return the
+                custom Keras objects.
+
+        Returns:
+            dict[str, Any]: The custom Keras objects in the form of a dictionary that
+                maps the name of the object to the actual object.
+        """
         pass
 
     def split_session_data(

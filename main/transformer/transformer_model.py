@@ -1,17 +1,18 @@
-from main.utils.config_util import extract_config
-from main.utils.neural_utils.custom_losses.masked_sparse_categorical_crossentropy import (
-    masked_sparse_categorical_crossentropy,
-)
-from main.utils.neural_utils.custom_layers.projection_head import (
-    ProjectionHead,
-)
-from main.transformer.custom_layers.embedding_layer import (
-    EmbeddingLayer,
-)
+from abc import abstractmethod
 
 import tensorflow as tf
 from tensorflow import keras
-from abc import abstractmethod
+
+from main.transformer.custom_layers.embedding_layer import (
+    EmbeddingLayer,
+)
+from main.utils.config_util import extract_config
+from main.utils.neural_utils.custom_layers.projection_head import (
+    ProjectionHead,
+)
+from main.utils.neural_utils.custom_losses.masked_sparse_categorical_crossentropy import (
+    masked_sparse_categorical_crossentropy,
+)
 
 
 class TransformerModel(keras.Model):

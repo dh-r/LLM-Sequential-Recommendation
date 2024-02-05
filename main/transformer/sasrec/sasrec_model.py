@@ -1,16 +1,15 @@
-from main.transformer.transformer_model import (
-    TransformerModel,
-)
+import tensorflow as tf
+from tensorflow import keras
+
 from main.transformer.custom_layers.transformer_encoder_layer import (
     TransformerEncoderLayer,
+)
+from main.transformer.transformer_model import (
+    TransformerModel,
 )
 from main.utils.neural_utils.custom_preprocessors.tensor_factory import (
     TensorFactory,
 )
-
-
-import tensorflow as tf
-from tensorflow import keras
 
 
 class SASRecModel(TransformerModel):

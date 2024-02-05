@@ -1,25 +1,27 @@
-from main.neural_model import NeuralModel
-from main.grurec.grurec_model import GRURecModel
+import logging
+from typing import Any, Dict
 
-from main.utils.neural_utils.custom_generators.next_item_train_generator import (
-    NextItemTrainGenerator,
-)
+import numpy as np
+import pandas as pd
+from tensorflow import keras
+
+from main.grurec.grurec_model import GRURecModel
+from main.neural_model import NeuralModel
+from main.utils.config_util import extract_config
+from main.utils.id_reducer import IDReducer
 from main.utils.neural_utils.custom_generators.next_item_test_generator import (
     NextItemTestGenerator,
 )
+from main.utils.neural_utils.custom_generators.next_item_train_generator import (
+    NextItemTrainGenerator,
+)
+from main.utils.neural_utils.custom_losses.masked_sparse_categorical_crossentropy import (
+    masked_sparse_categorical_crossentropy,
+)
+from main.utils.neural_utils.custom_preprocessors.data_description import *
 from main.utils.top_k_computer import TopKComputer
-from main.utils.config_util import extract_config
 from main.utils.utils import INT_INF
 from main.utils.utils import to_dense_encoding
-from main.utils.id_reducer import IDReducer
-from main.utils.neural_utils.custom_preprocessors.data_description import *
-
-from tensorflow import keras
-import numpy as np
-import pandas as pd
-
-from typing import Any, Dict
-import logging
 
 
 class GRURec(NeuralModel):
@@ -181,3 +183,23 @@ class GRURec(NeuralModel):
 
     def name(self) -> str:
         return "GRU4Rec"
+
+    @classmethod
+    def get_custom_keras_objects(cls: type["GRURec"]) -> dict[str, Any]:
+        """Get the custom Keras objects that are necessary to load the model
+        back into memory.
+
+        For GRU4Rec, we have a custom loss function, so we need to add this to
+        our custom Keras objects.
+
+        Args:
+            cls (type[NeuralModel]): The class of the model for which to return the
+                custom Keras objects. In this case, it will simply be the BERT class.
+
+        Returns:
+            dict[str, Any]: The custom Keras objects in the form of a dictionary that
+                maps the name of the object to the actual object.
+        """
+        return {
+            "masked_sparse_categorical_crossentropy": masked_sparse_categorical_crossentropy
+        }

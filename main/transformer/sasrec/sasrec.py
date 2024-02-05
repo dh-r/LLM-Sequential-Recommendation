@@ -1,18 +1,16 @@
-from main.transformer.transformer import Transformer
+import pandas as pd
+from tensorflow import keras
+
 from main.transformer.sasrec.sasrec_model import (
     SASRecModel,
+)
+from main.transformer.transformer import Transformer
+from main.utils.neural_utils.custom_generators.next_item_test_generator import (
+    NextItemTestGenerator,
 )
 from main.utils.neural_utils.custom_generators.next_item_train_generator import (
     NextItemTrainGenerator,
 )
-from main.utils.neural_utils.custom_generators.next_item_test_generator import (
-    NextItemTestGenerator,
-)
-from typing import Any
-
-import pandas as pd
-import tensorflow as tf
-from tensorflow import keras
 
 
 class SASRec(Transformer):

@@ -1,8 +1,12 @@
-from main.neural_model import NeuralModel
-from main.utils.top_k_computer import TopKComputer
-from main.utils.id_reducer import IDReducer
-from main.utils.utils import to_dense_encoding
+import logging
+from typing import Dict, Any
 
+import numpy as np
+import pandas as pd
+
+from main.neural_model import NeuralModel
+from main.utils.config_util import extract_config
+from main.utils.id_reducer import IDReducer
 from main.utils.neural_utils.custom_losses.masked_sparse_categorical_crossentropy import (
     masked_sparse_categorical_crossentropy,
 )
@@ -10,15 +14,9 @@ from main.utils.neural_utils.custom_preprocessors.data_description import (
     DataDescription,
     get_data_description,
 )
+from main.utils.top_k_computer import TopKComputer
 from main.utils.utils import INT_INF
-
-from main.utils.config_util import extract_config
-
-import numpy as np
-import pandas as pd
-
-import logging
-from typing import Dict, Any
+from main.utils.utils import to_dense_encoding
 
 
 class Transformer(NeuralModel):

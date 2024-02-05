@@ -1,16 +1,14 @@
-from main.utils.neural_utils.custom_preprocessors.tensor_factory import (
-    TensorFactory,
-)
-
-import tensorflow as tf
+import math
+from typing import Tuple, Union
 
 import numpy as np
 import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
 
-from typing import Tuple, Union
-import math
+from main.utils.neural_utils.custom_preprocessors.tensor_factory import (
+    TensorFactory,
+)
 
 
 class NextItemTestGenerator(keras.utils.Sequence):

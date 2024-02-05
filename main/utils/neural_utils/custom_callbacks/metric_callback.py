@@ -1,13 +1,13 @@
-from main.abstract_model import Model
+from typing import Union, Any
+
+import numpy as np
+from keras import callbacks
+
 from main.eval.metrics.metric import (
     RankingMetric,
     MetricDependency,
 )
-
-from keras import callbacks
-import numpy as np
-
-from typing import Union, Any
+from main.abstract_model import Model
 
 
 class MetricCallback(callbacks.Callback):
@@ -68,4 +68,4 @@ class MetricCallback(callbacks.Callback):
         # here to get the name, and use it as the key in our logs.
         temp_metric = self.metric_cls()
         temp_metric.top_k = self.top_k
-        logs[f"{self.prefix}_{temp_metric.name()}"] = result
+        logs[f"{self.prefix}{temp_metric.name()}"] = result

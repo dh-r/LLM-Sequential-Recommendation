@@ -1,18 +1,16 @@
-from main.utils.neural_utils.custom_preprocessors.tensor_factory import (
-    TensorFactory,
+import tensorflow as tf
+from keras import layers
+from tensorflow import keras
+
+from main.utils.neural_utils.custom_layers.projection_head import (
+    ProjectionHead,
 )
 from main.utils.neural_utils.custom_losses.masked_sparse_categorical_crossentropy import (
     masked_sparse_categorical_crossentropy,
 )
-from main.utils.neural_utils.custom_layers.projection_head import (
-    ProjectionHead,
+from main.utils.neural_utils.custom_preprocessors.tensor_factory import (
+    TensorFactory,
 )
-
-
-import tensorflow as tf
-from tensorflow import keras
-
-from keras import layers
 
 
 class GRURecModel(keras.Model):

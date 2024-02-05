@@ -1,16 +1,16 @@
-from main.transformer.transformer import Transformer
+import pandas as pd
+from tensorflow import keras
+
 from main.transformer.bert.bert_model import (
     BERTModel,
-)
-from main.transformer.bert.custom_generators.train_generator import (
-    TrainGenerator,
 )
 from main.transformer.bert.custom_generators.test_generator import (
     TestGenerator,
 )
-
-import pandas as pd
-from tensorflow import keras
+from main.transformer.bert.custom_generators.train_generator import (
+    TrainGenerator,
+)
+from main.transformer.transformer import Transformer
 
 
 class BERT(Transformer):

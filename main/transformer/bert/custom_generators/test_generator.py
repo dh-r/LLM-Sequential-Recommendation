@@ -1,22 +1,21 @@
-from main.utils.neural_utils.custom_preprocessors.cloze import (
-    Cloze,
-)
-from main.utils.neural_utils.custom_preprocessors.tensor_factory import (
-    TensorFactory,
-)
-from main.utils.neural_utils.custom_preprocessors.data_description import (
-    DataDescription,
-)
-from main.utils.utils import INT_INF
+from typing import Tuple
+from typing import Union, Dict
 
 import numpy as np
 import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
 
-from typing import Dict, Tuple
-
-from typing import Union, Dict
+from main.utils.neural_utils.custom_preprocessors.cloze import (
+    Cloze,
+)
+from main.utils.neural_utils.custom_preprocessors.data_description import (
+    DataDescription,
+)
+from main.utils.neural_utils.custom_preprocessors.tensor_factory import (
+    TensorFactory,
+)
+from main.utils.utils import INT_INF
 
 
 class TestGenerator(keras.utils.Sequence):

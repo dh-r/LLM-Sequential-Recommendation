@@ -6,7 +6,7 @@ authors = ["DH Research"]
 packages = [{ include = "main" }]
 
 [tool.poetry.dependencies]
-python = "~3.9"
+python = "~3.11"
 pandas = "^1.4.2"
 ipykernel = "^6.13.0"
 jupyter-contrib-nbextensions = "^0.5.1"
@@ -19,12 +19,11 @@ jupyterlab-code-formatter = "^1.4.11"
 papermill = "^2.3.4"
 scikit-optimize = "^0.9.0"
 numpy = "^1.23"
-tensorflow-macos = { version = "^2.11.0", platform = "darwin" } 
-tensorflow = { version = "^2.10", platform = "linux" }
 openai = "0.27"
 matplotlib = "^3.7.2"
 numba = "^0.57.1"
 google-cloud-aiplatform = "^1.36.4"
+tensorflow = "2.13.0"
 
 [tool.poetry.group.dev.dependencies]
 black = { extras = ["jupyter"], version = "^23.1.0" }

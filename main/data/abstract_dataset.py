@@ -9,6 +9,31 @@ from typing import Any, Optional, TypeVar, Union
 
 import numpy as np
 
+from pandas.core.indexes.base import Index
+
+
+class NumericIndex(Index):
+    pass
+
+
+class IntegerIndex(NumericIndex):
+    pass
+
+
+class Int64Index(IntegerIndex):
+    pass
+
+
+class UInt64Index(IntegerIndex):
+    pass
+
+
+class Float64Index(NumericIndex):
+    pass
+
+
+from main.exceptions import InvalidStateError
+
 # A type variable denoting the data structure to be used in a Dataset implementation.
 DatasetT = TypeVar("DatasetT")
 
@@ -169,12 +194,12 @@ class Dataset(ABC):
 
         Raises:
             ValueError: If the provided SplitStrategy cannot do k-fold splitting.
-            Exception: If the train data does not exist yet.
+            InvalidStateError: If the train data does not exist yet.
         """
         if not split_strategy.can_split_k_fold():
             raise ValueError("This instance cannot apply k-fold splitting.")
         if not self.has_train_data():
-            raise Exception("The train data is not created yet.")
+            raise InvalidStateError("The train data is not created yet.")
 
         self.k_fold = split_strategy.split_k_fold(self.train_data)
 
@@ -183,10 +208,10 @@ class Dataset(ABC):
         prepare_to_predict and extract_ground_truths on the test data.
 
         Raises:
-            Exception: If the test data has not been initialized yet.
+            InvalidStateError: If the test data has not been initialized yet.
         """
         if not self.has_test_data():
-            raise Exception("The test data has not been initialized.")
+            raise InvalidStateError("The test data has not been initialized.")
 
         self.test_data_eval = (
             self._prepare_to_predict(self.test_data),
@@ -199,10 +224,10 @@ class Dataset(ABC):
         instance.
 
         Raises:
-            Exception: If the validation folds have not been initialized yet.
+            InvalidStateError: If the validation folds have not been initialized yet.
         """
         if not self.has_k_fold():
-            raise Exception("The validation folds have not been initialized.")
+            raise InvalidStateError("The validation folds have not been initialized.")
 
         new_eval_list: list[tuple[DatasetT, Any, dict[int, np.ndarray]]] = []
         for fold in self.get_k_fold():
@@ -222,10 +247,10 @@ class Dataset(ABC):
             The input dataset.
 
         Raises:
-            Exception: If the input data has not been set.
+            InvalidStateError: If the input data has not been set.
         """
         if not self.has_input_data():
-            raise Exception("The input data has not been set.")
+            raise InvalidStateError("The input data has not been set.")
         return self.input_data
 
     def set_input_data(self, input_data: DatasetT) -> None:
@@ -251,10 +276,10 @@ class Dataset(ABC):
             The training dataset.
 
         Raises:
-            Exception: If the training data has not been initialized.
+            InvalidStateError: If the training data has not been initialized.
         """
         if not self.has_train_data():
-            raise Exception("Training data has not been initialized.")
+            raise InvalidStateError("Training data has not been initialized.")
         return self.train_data
 
     def set_train_data(self, train_data: DatasetT) -> None:
@@ -280,10 +305,10 @@ class Dataset(ABC):
             The test dataset.
 
         Raises:
-            Exception: If the test data has not been initialized.
+            InvalidStateError: If the test data has not been initialized.
         """
         if not self.has_test_data():
-            raise Exception("The test data has not been initialized.")
+            raise InvalidStateError("The test data has not been initialized.")
         return self.test_data
 
     def set_test_data(self, test_data: DatasetT) -> None:
@@ -309,11 +334,13 @@ class Dataset(ABC):
             The test dataset evaluation tuple.
 
         Raises:
-            Exception: If the test data evaluation tuple has not been
+            InvalidStateError: If the test data evaluation tuple has not been
                 initialized.
         """
         if not self.has_test_data_eval():
-            raise Exception("Test data evaluation tuple has not been initialized.")
+            raise InvalidStateError(
+                "Test data evaluation tuple has not been initialized."
+            )
         return self.test_data_eval
 
     def get_test_prompts(self) -> Any:
@@ -347,10 +374,10 @@ class Dataset(ABC):
             A list containing k folds.
 
         Raises:
-            Exception: If the k folds evaluation tuple list is not initialized.
+            InvalidStateError: If the k folds evaluation tuple list is not initialized.
         """
         if not self.has_k_fold():
-            raise Exception("k fold list has not been initialized")
+            raise InvalidStateError("k fold list has not been initialized")
         return self.k_fold
 
     def set_k_fold(self, k_fold: list[tuple[DatasetT, DatasetT]]) -> None:
@@ -376,10 +403,12 @@ class Dataset(ABC):
             The k_fold evaluation tuple list.
 
         Raises:
-            Exception: If k_fold_eval list is empty.
+            InvalidStateError: If k_fold_eval list is empty.
         """
         if not self.has_k_fold_eval():
-            raise Exception("k-folds evaluation tuple list has not been initialized.")
+            raise InvalidStateError(
+                "k-folds evaluation tuple list has not been initialized."
+            )
         return self.k_fold_eval
 
     def has_k_fold_eval(self) -> bool:

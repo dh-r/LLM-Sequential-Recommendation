@@ -1,42 +1,56 @@
-from typing import Any
-
-from tensorflow import keras
-from main.abstract_model import Model
-from main.transformer.bert.bert import BERT
-from sklearn.decomposition import PCA
-import shutil
-import os
-import pandas as pd
+import ast
+import inspect
 import json
+from typing import Any, Literal
+
 import numpy as np
+import pandas as pd
+from sklearn.decomposition import PCA
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.random_projection import GaussianRandomProjection
+
+from main.abstract_model import Model
+from main.data.side_information import (
+    create_side_information,
+    SideInformation,
+)
+from main.transformer.bert.bert import BERT
+from main.utils.side_encoder import SideEncoder
 
 
 class BERTWithEmbeddings(BERT):
     product_embeddings = None
 
-    def __init__(self, product_embeddings_location, **bert_config) -> None:
-        self.bert_config = bert_config
-        self.product_embeddings_location = product_embeddings_location
+    def __init__(
+        self,
+        product_embeddings_location,
+        red_method: Literal["PCA", "RANDOM", "AE", "LDA"],
+        red_params: dict,
+        **bert_config,
+    ) -> None:
+        """Inits an instance of BERTWithEmbeddings.
 
+        Args:
+            product_embeddings_location: A string indicating the path to the embedding
+                file.
+            red_method: A string indicating the dimensionality reduction method to use.
+            red_params: A dictionary containing the configuration of the reduction.
+            **bert_config: The rest of the parameters that belong to the BERT model.
+        """
+        self.product_embeddings_location = product_embeddings_location
+        self.red_method = red_method
+        self.red_params = {k: ast.literal_eval(v) for k, v in red_params.items()}
+        self.bert_config = bert_config
         super().__init__(**bert_config)
 
         if BERTWithEmbeddings.product_embeddings is None:
             BERTWithEmbeddings.product_embeddings = pd.read_csv(
                 product_embeddings_location,
-                compression="gzip",
-                usecols=["global_product_id", "name", "ada_embedding"],
-            )
-            BERTWithEmbeddings.product_id_to_name = (
-                BERTWithEmbeddings.product_embeddings[["global_product_id", "name"]]
-                .set_index("global_product_id")
-                .to_dict()["name"]
             )
             BERTWithEmbeddings.product_index_to_embedding = (
-                BERTWithEmbeddings.product_embeddings[
-                    ["global_product_id", "ada_embedding"]
-                ]
-                .set_index("global_product_id")
-                .to_dict()["ada_embedding"]
+                BERTWithEmbeddings.product_embeddings[["ItemId", "embedding"]]
+                .set_index("ItemId")
+                .to_dict()["embedding"]
             )
             BERTWithEmbeddings.product_index_to_embedding = {
                 k: json.loads(v)
@@ -46,9 +60,9 @@ class BERTWithEmbeddings(BERT):
                 list(BERTWithEmbeddings.product_index_to_embedding.values())
             )
 
-        BERTWithEmbeddings.product_index_to_id = list(
-            BERTWithEmbeddings.product_id_to_name.keys()
-        )
+        BERTWithEmbeddings.product_index_to_id = BERTWithEmbeddings.product_embeddings[
+            "ItemId"
+        ].tolist()
         BERTWithEmbeddings.product_id_to_index = {
             id: index for index, id in enumerate(BERTWithEmbeddings.product_index_to_id)
         }
@@ -61,19 +75,89 @@ class BERTWithEmbeddings(BERT):
             return
 
         temp_config = self.bert_config.copy()
-
         temp_config["num_epochs"] = 0
-
+        # TODO in future, we should migrate to use the DimReducer. During that migration
+        #  we can also deal with LDA dim mismatch more cleanly.
+        if self.red_method == "LDA":
+            if self.emb_dim > (
+                max_reduced_dim_size := min(
+                    BERTWithEmbeddings.product_index_to_embedding.shape[1],
+                    len(np.unique(BERTWithEmbeddings.product_embeddings["class"])) - 1,
+                )
+            ):
+                temp_config["emb_dim"] = max_reduced_dim_size
         self.temp_model = BERT(**temp_config)
-
         # We do not actually train here, this is just for initializing the variables
         # we need.
         self.temp_model.train(train_data)
 
-        pca = PCA(n_components=self.emb_dim)
-        BERTWithEmbeddings.product_index_to_embedding_pca = pca.fit_transform(
-            BERTWithEmbeddings.product_index_to_embedding
-        )
+        if self.red_method == "PCA":
+            pca = PCA(n_components=self.emb_dim)
+            BERTWithEmbeddings.product_index_to_embedding_red = pca.fit_transform(
+                BERTWithEmbeddings.product_index_to_embedding
+            )
+        elif self.red_method == "RANDOM":
+            grp = GaussianRandomProjection(n_components=self.emb_dim)
+            BERTWithEmbeddings.product_index_to_embedding_red = grp.fit_transform(
+                BERTWithEmbeddings.product_index_to_embedding
+            )
+        elif self.red_method == "AE":
+            side_information: SideInformation = create_side_information(
+                BERTWithEmbeddings.product_index_to_embedding, []
+            )
+
+            side_encoder_param_names: list = [
+                param.name
+                for param in inspect.signature(SideEncoder.__init__).parameters.values()
+                if param.name != "self"
+            ]
+            side_encoder_params: dict = {
+                k: v
+                for k, v in self.red_params.items()
+                if k in side_encoder_param_names
+            }
+            side_encoder: SideEncoder = SideEncoder(
+                side_information=side_information,
+                encoder_dimension=self.emb_dim,
+                **side_encoder_params,
+            )
+
+            pretrain_param_names: list = [
+                param.name
+                for param in inspect.signature(SideEncoder.pretrain).parameters.values()
+                if param.name != "self"
+            ]
+            pretrain_params: dict = {
+                k: v for k, v in self.red_params.items() if k in pretrain_param_names
+            }
+            side_encoder.pretrain(**pretrain_params)
+
+            BERTWithEmbeddings.product_index_to_embedding_red = (
+                side_encoder.get_encodings(
+                    BERTWithEmbeddings.product_index_to_embedding
+                )
+            )
+        elif self.red_method == "LDA":
+            class_labels = BERTWithEmbeddings.product_embeddings["class"]
+            if self.emb_dim > (
+                max_reduced_dim_size := min(
+                    BERTWithEmbeddings.product_index_to_embedding.shape[1],
+                    len(np.unique(class_labels)) - 1,
+                )
+            ):
+                n_components: int = max_reduced_dim_size
+            else:
+                n_components: int = self.emb_dim
+            lda: LinearDiscriminantAnalysis = LinearDiscriminantAnalysis(
+                n_components=n_components, **self.red_params
+            )
+            BERTWithEmbeddings.product_index_to_embedding_red = lda.fit_transform(
+                BERTWithEmbeddings.product_index_to_embedding, class_labels
+            )
+        else:
+            raise Exception(
+                f"Unknown reduce method for embeddings. Got {self.red_method}"
+            )
 
         # Inject the embeddings in the correct order, defined by the ID reducer.
         ordering = list(
@@ -81,7 +165,7 @@ class BERTWithEmbeddings(BERT):
         )
         ordering = [BERTWithEmbeddings.product_id_to_index[item] for item in ordering]
         reduced_embeddings = np.array(
-            [BERTWithEmbeddings.product_index_to_embedding_pca[ordering]]
+            [BERTWithEmbeddings.product_index_to_embedding_red[ordering]]
         )
 
         # We do not have a pre-computed embedding for the mask, so we take the original
